@@ -1,14 +1,18 @@
+library(sqldf)
+library(dplyr)
+library(lubridate)
 
-AllData <- read.table ("./household_power_consumption.txt", header=TRUE, sep=";", na.strings = "?", stringsAsFactors=F)
+# read file and convert data and time columns
+file <- "household_power_consumption.txt"
+power <- read.csv.sql(file, sql = "select * from file where Date  in ('1/2/2007', '2/2/2007')", sep =";" )
+closeAllConnections()
+power <- mutate(power, Date = dmy(Date), Time = hms(Time))
 
-dim(AllData)
-head(AllData)
-str(AllData)
-AllData$Date <- as.Date(AllData$Date, format="%d/%m/%Y")
-class(AllData$Date)
-unique(AllData$Date)
-Data <- subset (AllData, subset=(Date >= "2007-02-01" & Date<="2007-02-02"))
-str(Data)
-png(filename="plot1.png", width=480, height=480, units="px")
-hist (Data$Global_active_power, col="red", main="Global Active Power", xlab="Global Active Power (kilowatts)")
+#create plot1
+png(file = "plot1.png", width = 480, height = 480)
+with(power, hist(Global_active_power, 
+                 col = "red", 
+                 xlab = "Global Active Power (kilowatts)", 
+                 ylab = "Frequency",
+                 main = "Global Active Power"))
 dev.off()
